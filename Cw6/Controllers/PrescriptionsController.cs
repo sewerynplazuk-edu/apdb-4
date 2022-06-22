@@ -16,11 +16,11 @@ namespace Cw6.Controllers
 		}
 
         [HttpGet]
-		public async Task<IActionResult> GetPrescription(PrescriptionQueryDTO prescription)
+		public async Task<IActionResult> GetPrescription([FromQuery] int idPrescription)
         {
-			var result = await _prescriptionService.GetPrescription(prescription);
+			var result = await _prescriptionService.GetPrescription(idPrescription);
 			if (result == null) {
-				return NotFound("No prescriptions");
+				return NotFound("Prescription with given id not found");
 			}
 			return Ok(result);
         }

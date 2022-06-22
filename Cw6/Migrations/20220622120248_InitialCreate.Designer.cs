@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cw6.Migrations
 {
     [DbContext(typeof(MasterContext))]
-    [Migration("20220531075636_SeedData")]
-    partial class SeedData
+    [Migration("20220622120248_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -33,14 +33,17 @@ namespace Cw6.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDoctor"), 1L, 1);
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -74,14 +77,17 @@ namespace Cw6.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMedicament"), 1L, 1);
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -115,13 +121,15 @@ namespace Cw6.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPatient"), 1L, 1);
 
                     b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -155,10 +163,10 @@ namespace Cw6.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPrescription"), 1L, 1);
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("IdDoctor")
                         .HasColumnType("int");
@@ -202,6 +210,7 @@ namespace Cw6.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Details")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Dose")
@@ -211,7 +220,7 @@ namespace Cw6.Migrations
 
                     b.HasIndex("IdPrescription");
 
-                    b.ToTable("PrescriptionMedicament");
+                    b.ToTable("PrescriptionMedicaments");
 
                     b.HasData(
                         new
@@ -235,11 +244,13 @@ namespace Cw6.Migrations
                     b.HasOne("Cw6.Models.Doctor", "Doctor")
                         .WithMany("Prescriptions")
                         .HasForeignKey("IdDoctor")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cw6.Models.Patient", "Patient")
                         .WithMany("Prescriptions")
                         .HasForeignKey("IdPatient")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Doctor");
@@ -252,11 +263,13 @@ namespace Cw6.Migrations
                     b.HasOne("Cw6.Models.Medicament", "Medicament")
                         .WithMany("PrescriptionMedicaments")
                         .HasForeignKey("IdMedicament")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cw6.Models.Prescription", "Prescription")
                         .WithMany("PrescriptionMedicaments")
                         .HasForeignKey("IdPrescription")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Medicament");

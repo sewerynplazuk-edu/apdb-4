@@ -12,10 +12,11 @@ namespace Cw6.Models
 		{
 		}
 
-		public DbSet<Patient> Patients { get; set; } = null!;
-		public DbSet<Doctor> Doctors { get; set; } = null!;
-		public DbSet<Prescription> Prescriptions { get; set; } = null!;
-		public DbSet<Medicament> Medicaments { get; set; } = null!;
+		public DbSet<Patient> Patients { get; set; }
+		public DbSet<Doctor> Doctors { get; set; }
+		public DbSet<Prescription> Prescriptions { get; set; }
+		public DbSet<Medicament> Medicaments { get; set; }
+		public DbSet<PrescriptionMedicament> PrescriptionMedicaments { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,9 +25,9 @@ namespace Cw6.Models
 			modelBuilder.Entity<Patient>(patient =>
             {
 				patient.HasKey(e => e.IdPatient);
-				patient.Property(e => e.FirstName).HasMaxLength(100);
-				patient.Property(e => e.LastName).HasMaxLength(100);
-				patient.Property(e => e.BirthDate).HasColumnType("datetime");
+				patient.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
+				patient.Property(e => e.LastName).IsRequired().HasMaxLength(100);
+				patient.Property(e => e.BirthDate).IsRequired();
 
 				patient.HasData(
 					new Patient { IdPatient = 1, FirstName = "Jan", LastName = "Kowalski", BirthDate = DateTime.Parse("1995-01-01")},
@@ -37,9 +38,9 @@ namespace Cw6.Models
 			modelBuilder.Entity<Doctor>(doctor =>
 			{
 				doctor.HasKey(e => e.IdDoctor);
-				doctor.Property(e => e.FirstName).HasMaxLength(100);
-				doctor.Property(e => e.LastName).HasMaxLength(100);
-				doctor.Property(e => e.Email).HasMaxLength(100);
+				doctor.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
+				doctor.Property(e => e.LastName).IsRequired().HasMaxLength(100);
+				doctor.Property(e => e.Email).IsRequired().HasMaxLength(100);
 
 				doctor.HasData(
 					new Doctor { IdDoctor = 1, FirstName = "Jan", LastName = "Kowalski", Email = "jan.kowalski@lekarz.com"},
@@ -50,16 +51,14 @@ namespace Cw6.Models
 			modelBuilder.Entity<Prescription>(prescription =>
 			{
 				prescription.HasKey(e => e.IdPrescription);
-				prescription.Property(e => e.Date).HasColumnType("datetime");
-				prescription.Property(e => e.DueDate).HasColumnType("datetime");
+				prescription.Property(e => e.Date).IsRequired();
+				prescription.Property(e => e.DueDate).IsRequired();
 				prescription.HasOne(e => e.Patient)
 						.WithMany(p => p.Prescriptions)
-						.HasForeignKey(e => e.IdPatient)
-						.OnDelete(DeleteBehavior.ClientSetNull);
+						.HasForeignKey(e => e.IdPatient);
 				prescription.HasOne(e => e.Doctor)
 						.WithMany(d => d.Prescriptions)
-						.HasForeignKey(e => e.IdDoctor)
-						.OnDelete(DeleteBehavior.ClientSetNull);
+						.HasForeignKey(e => e.IdDoctor);
 
 				prescription.HasData(
 					new Prescription { IdPrescription = 1, Date = DateTime.Parse("2022-05-25"), DueDate = DateTime.Parse("2023-01-01"), IdDoctor = 1, IdPatient = 1 },
@@ -86,12 +85,10 @@ namespace Cw6.Models
 				prescriptionMedicament.Property(e => e.Dose).IsRequired(false);
 				prescriptionMedicament.HasOne(e => e.Medicament)
 							.WithMany(m => m.PrescriptionMedicaments)
-							.HasForeignKey(e => e.IdMedicament)
-							.OnDelete(DeleteBehavior.ClientSetNull);
+							.HasForeignKey(e => e.IdMedicament);
 				prescriptionMedicament.HasOne(e => e.Prescription)
 							.WithMany(p => p.PrescriptionMedicaments)
-							.HasForeignKey(e => e.IdPrescription)
-							.OnDelete(DeleteBehavior.ClientSetNull);
+							.HasForeignKey(e => e.IdPrescription);
 
 				prescriptionMedicament.HasData(
 					new PrescriptionMedicament { IdMedicament = 1, IdPrescription = 1, Dose = 1, Details = "po posiłku" },

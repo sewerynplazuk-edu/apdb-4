@@ -1,9 +1,10 @@
 ﻿using System;
+using Cw6.Models.DTOs;
 namespace Cw6.Services
 {
 	public interface IPrescriptionService
 	{
-		Task<PrescriptionDTO?> GetPrescription(PrescriptionQueryDTO prescriptionQueryDTO);
+		Task<SomeKindOfPrescription> GetPrescription(int idPrescription);
 	}
 }
 

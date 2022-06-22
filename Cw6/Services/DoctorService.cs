@@ -1,6 +1,6 @@
 ﻿using System;
 using Cw6.Models;
-using Cw6.Models.DTO;
+using Cw6.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cw6.Services
@@ -14,10 +14,10 @@ namespace Cw6.Services
 			_masterContext = masterContext;
 		}
 
-        public async Task<IEnumerable<DoctorDTO>> GetDoctors()
-        {
+		public async Task<IEnumerable<SomeKindOfDoctor>> GetDoctors()
+		{
 			return await _masterContext.Doctors
-					.Select(doctor => new DoctorDTO
+					.Select(doctor => new SomeKindOfDoctor
 					{
 						FirstName = doctor.FirstName,
 						LastName = doctor.LastName,
@@ -25,14 +25,39 @@ namespace Cw6.Services
 					}).ToListAsync();
         }
 
-        async Task IDoctorService.AddDoctor(DoctorDTO doctorDTO)
+		public async Task<SomeKindOfDoctor?> GetDoctor(int idDoctor)
         {
-			var lastDoctorOrderedById = await _masterContext.Doctors.OrderBy(d => d.IdDoctor).LastAsync();
-			var nextIdDoctor = lastDoctorOrderedById.IdDoctor + 1;
+			return await _masterContext.Doctors
+					.Where(doctor => doctor.IdDoctor == idDoctor)
+					.Select(doctor => new SomeKindOfDoctor
+					{
+						FirstName = doctor.FirstName,
+						LastName = doctor.LastName,
+						Email = doctor.Email
+					}).FirstOrDefaultAsync();
+        }
 
+		public async Task<bool> DoesDoctorExists(SomeKindOfDoctor doctorDTO)
+		{
+			var doctor = await _masterContext.Doctors
+				.Where(doctor => doctor.FirstName == doctorDTO.FirstName && doctor.LastName == doctorDTO.LastName && doctor.Email == doctorDTO.Email)
+				.FirstOrDefaultAsync();
+			return doctor is not null; 
+		}
+
+
+		public async Task<bool> DoesDoctorExists(int idDoctor)
+        {
+			var doctor = await _masterContext.Doctors
+				.Where(doctor => doctor.IdDoctor == idDoctor)
+				.FirstOrDefaultAsync();
+			return doctor is not null;
+        }
+
+		public async Task AddDoctor(SomeKindOfDoctor doctorDTO)
+		{
 			var doctor = new Doctor
 			{
-				IdDoctor = nextIdDoctor,
 				FirstName = doctorDTO.FirstName,
 				LastName = doctorDTO.LastName,
 				Email = doctorDTO.Email
@@ -40,20 +65,9 @@ namespace Cw6.Services
 
 			_masterContext.Add(doctor);
 			await _masterContext.SaveChangesAsync();
-        }
+		}
 
-        async Task<bool> IDoctorService.DoesDoctorExists(int idDoctor)
-        {
-			var count = await _masterContext.Doctors.CountAsync(d => d.IdDoctor == idDoctor);
-			return count == 1;
-        }
-
-        Task<IEnumerable<DoctorDTO>> IDoctorService.GetDoctors()
-        {
-            throw new NotImplementedException();
-        }
-
-        async Task IDoctorService.UpdateDoctor(int idDoctor, DoctorDTO doctorDTO)
+		public async Task UpdateDoctor(int idDoctor, SomeKindOfDoctor doctorDTO)
         {
 			var doctor = await _masterContext.Doctors.Where(d => d.IdDoctor == idDoctor).FirstOrDefaultAsync();
 			if (doctor == null)
@@ -68,16 +82,14 @@ namespace Cw6.Services
 			await _masterContext.SaveChangesAsync();
         }
 
-		async Task IDoctorService.DeleteDoctor(int idDoctor)
+		public async Task DeleteDoctor(int idDoctor)
 		{
-			var doctor = await _masterContext.Doctors.Where(d => d.IdDoctor == idDoctor).FirstOrDefaultAsync();
-			if (doctor == null)
-			{
-				throw new Exception("This method assumes that doctor was added to the database");
-			}
+			var doctor = new Doctor { IdDoctor = idDoctor };
+			_masterContext.ChangeTracker.Clear();
+			_masterContext.Attach(doctor);
 			_masterContext.Remove(doctor);
 			await _masterContext.SaveChangesAsync();
 		}
-	}
+    }
 }
 
